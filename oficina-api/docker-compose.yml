@@ -1,0 +1,17 @@
+
+version: "3.9"
+services:
+  app:
+    build: .
+    env_file:
+      - .env
+    container_name: oficina-app
+    ports:
+      - "${APP_PORT:-8080}:8080"
+    environment:
+      # Empty -> HTTP Basic; set to 'oauth2' to enable JWT Resource Server
+      SPRING_PROFILES_ACTIVE: "${SPRING_PROFILES_ACTIVE}"
+    # Uncomment to mount local source (dev) and rebuild fast using JIT in container
+    # volumes:
+    #   - .:/app-src
+    # command: ["/bin/sh","-c","cd /app-src && ./mvnw spring-boot:run"]
