@@ -1,7 +1,7 @@
 package com.oficina.api.web.controller;
 
-import com.oficina.api.domain.Servico;
-import com.oficina.api.domain.ServicoRepository;
+import com.oficina.api.application.ServicoService;
+import com.oficina.api.domain.entity.Servico;
 import com.oficina.api.web.dto.ServicoDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -10,23 +10,23 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/servicos")
 public class ServicoController {
 
-    private  final  ServicoRepository servicoRepository;
+    private final ServicoService servicoService;
 
     @Autowired
-    public ServicoController(ServicoRepository servicoRepository) {
-        this.servicoRepository = servicoRepository;
+    public ServicoController(ServicoService servicoService) {
+        this.servicoService = servicoService;
     }
 
     @GetMapping("/{id}")
     public ServicoDto getServico(@PathVariable Long id) {
-        Servico servico = servicoRepository.findById(id);
+        Servico servico = servicoService.findById(id).orElse(null);
         return toDto(servico);
     }
 
     @PostMapping
     public ServicoDto createServico(@RequestBody ServicoDto servicoDto) {
         Servico servico = toEntity(servicoDto);
-        Servico saved = servicoRepository.save(servico);
+        Servico saved = servicoService.save(servico);
         return toDto(saved);
     }
 
@@ -34,13 +34,13 @@ public class ServicoController {
     public ServicoDto updateServico(@PathVariable Long id, @RequestBody ServicoDto servicoDto) {
         Servico servico = toEntity(servicoDto);
         servico.setId(id);
-        Servico updated = servicoRepository.save(servico);
+        Servico updated = servicoService.save(servico);
         return toDto(updated);
     }
 
     @DeleteMapping("/{id}")
     public void deleteServico(@PathVariable Long id) {
-        // Implementação de remoção
+        servicoService.deleteById(id);
     }
 
     private ServicoDto toDto(Servico servico) {

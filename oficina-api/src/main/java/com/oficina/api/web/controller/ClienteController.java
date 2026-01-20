@@ -1,32 +1,31 @@
 package com.oficina.api.web.controller;
 
-import com.oficina.api.domain.Cliente;
-import com.oficina.api.domain.ClienteRepository;
+import com.oficina.api.application.ClienteService;
+import com.oficina.api.domain.entity.Cliente;
 import com.oficina.api.web.dto.ClienteDto;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Optional;
 import java.util.regex.Pattern;
 
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/clientes")
 public class ClienteController {
-    private final ClienteRepository clienteRepository;
-
-    @Autowired
-    public ClienteController(ClienteRepository clienteRepository) {
-        this.clienteRepository = clienteRepository;
-    }
+    private final ClienteService clienteService;
 
     @GetMapping("/{id}")
     public ClienteDto getCliente(@PathVariable Long id) {
-        Cliente cliente = clienteRepository.findById(id);
-        return toDto(cliente);
+        Optional<Cliente> cliente = clienteService.findCliente(id);
+        return toDto(cliente.orElse(null));
     }
 
     @PostMapping
     public ClienteDto createCliente(@RequestBody ClienteDto clienteDto) {
         Cliente cliente = toEntity(clienteDto);
-        Cliente saved = clienteRepository.save(cliente);
+        Cliente saved = clienteService.save(cliente);
         return toDto(saved);
     }
 
@@ -34,7 +33,7 @@ public class ClienteController {
     public ClienteDto updateCliente(@PathVariable Long id, @RequestBody ClienteDto clienteDto) {
         Cliente cliente = toEntity(clienteDto);
         cliente.setId(id);
-        Cliente updated = clienteRepository.save(cliente);
+        Cliente updated = clienteService.save(cliente);
         return toDto(updated);
     }
 

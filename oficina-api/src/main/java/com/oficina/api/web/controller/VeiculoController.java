@@ -1,33 +1,34 @@
 package com.oficina.api.web.controller;
 
-import com.oficina.api.domain.Veiculo;
-import com.oficina.api.domain.VeiculoRepository;
+import com.oficina.api.domain.entity.Veiculo;
+import com.oficina.api.application.VeiculoService;
 import com.oficina.api.web.dto.VeiculoDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import java.util.regex.Pattern;
-import com.oficina.api.domain.PlacaRegexProvider;
+import com.oficina.api.domain.entity.PlacaRegexProvider;
 
 @RestController
 @RequestMapping("/veiculos")
 public class VeiculoController {
 
-    private final VeiculoRepository veiculoRepository;
+    private final VeiculoService veiculoService;
+
     @Autowired
-     public VeiculoController(VeiculoRepository veiculoRepository) {
-        this.veiculoRepository = veiculoRepository;
+    public VeiculoController(VeiculoService veiculoService) {
+        this.veiculoService = veiculoService;
     }
 
     @GetMapping("/{placa}")
     public VeiculoDto getVeiculo(@PathVariable String placa) {
-        Veiculo veiculo = veiculoRepository.findByPlaca(placa);
+        Veiculo veiculo = veiculoService.findByPlaca(placa);
         return toDto(veiculo);
     }
 
     @PostMapping
     public VeiculoDto createVeiculo(@RequestBody VeiculoDto veiculoDto) {
         Veiculo veiculo = toEntity(veiculoDto);
-        Veiculo saved = veiculoRepository.save(veiculo);
+        Veiculo saved = veiculoService.save(veiculo);
         return toDto(saved);
     }
 
@@ -35,13 +36,13 @@ public class VeiculoController {
     public VeiculoDto updateVeiculo(@PathVariable String placa, @RequestBody VeiculoDto veiculoDto) {
         Veiculo veiculo = toEntity(veiculoDto);
         veiculo.setPlaca(placa);
-        Veiculo updated = veiculoRepository.save(veiculo);
+        Veiculo updated = veiculoService.save(veiculo);
         return toDto(updated);
     }
 
     @DeleteMapping("/{placa}")
     public void deleteVeiculo(@PathVariable String placa) {
-        // Implementação de remoção
+        veiculoService.deleteByPlaca(placa);
     }
 
     @PostMapping("/validar-placa")

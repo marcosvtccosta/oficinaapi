@@ -1,38 +1,39 @@
 package com.oficina.api.web.controller;
 
-import com.oficina.api.domain.OrdemServico;
-import com.oficina.api.domain.OrdemServicoRepository;
-import com.oficina.api.domain.OrdemServicoStatus;
+import com.oficina.api.domain.entity.OrdemServico;
+import com.oficina.api.domain.entity.OrdemServicoStatus;
+import com.oficina.api.domain.entity.Cliente;
+import com.oficina.api.domain.entity.Produto;
+import com.oficina.api.domain.entity.Servico;
 import com.oficina.api.web.dto.OrdemServicoDto;
 import com.oficina.api.web.dto.ClienteDto;
 import com.oficina.api.web.dto.ServicoDto;
 import com.oficina.api.web.dto.ProdutoDto;
+import com.oficina.api.application.OrdemServicoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import java.time.Duration;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/ordens-servico")
 public class OrdemServicoController {
-
-    private final OrdemServicoRepository ordemServicoRepository;
+    private final OrdemServicoService ordemServicoService;
 
     @Autowired
-    public OrdemServicoController(OrdemServicoRepository ordemServicoRepository) {
-        this.ordemServicoRepository = ordemServicoRepository;
+    public OrdemServicoController(OrdemServicoService ordemServicoService) {
+        this.ordemServicoService = ordemServicoService;
     }
 
     @GetMapping("/{id}")
     public OrdemServicoDto getOrdemServico(@PathVariable Long id) {
-        OrdemServico ordemServico = ordemServicoRepository.findById(id);
+        OrdemServico ordemServico = ordemServicoService.findById(id).orElse(null);
         return toDto(ordemServico);
     }
 
     @PostMapping
     public OrdemServicoDto createOrdemServico(@RequestBody OrdemServicoDto ordemServicoDto) {
         OrdemServico ordemServico = toEntity(ordemServicoDto);
-        OrdemServico saved = ordemServicoRepository.save(ordemServico);
+        OrdemServico saved = ordemServicoService.save(ordemServico);
         return toDto(saved);
     }
 
@@ -40,27 +41,30 @@ public class OrdemServicoController {
     public OrdemServicoDto updateOrdemServico(@PathVariable Long id, @RequestBody OrdemServicoDto ordemServicoDto) {
         OrdemServico ordemServico = toEntity(ordemServicoDto);
         ordemServico.setId(id);
-        OrdemServico updated = ordemServicoRepository.save(ordemServico);
+        OrdemServico updated = ordemServicoService.save(ordemServico);
         return toDto(updated);
     }
 
     @DeleteMapping("/{id}")
     public void deleteOrdemServico(@PathVariable Long id) {
-        // Implementação de remoção
+        ordemServicoService.deleteById(id);
     }
 
     @PatchMapping("/{id}/status")
     public OrdemServicoDto alterarStatus(@PathVariable Long id, @RequestParam OrdemServicoStatus status) {
-        OrdemServico ordem = ordemServicoRepository.findById(id);
-        ordem.setStatus(status);
-        OrdemServico updated = ordemServicoRepository.save(ordem);
-        return toDto(updated);
+        OrdemServico ordem = ordemServicoService.findById(id).orElse(null);
+        if (ordem != null) {
+            ordem.setStatus(status);
+            OrdemServico updated = ordemServicoService.save(ordem);
+            return toDto(updated);
+        }
+        return null;
     }
 
     @GetMapping("/{id}/tempo-gasto")
     public String tempoGasto(@PathVariable Long id) {
-        OrdemServico ordem = ordemServicoRepository.findById(id);
-        if (ordem.getDataInicio() != null && ordem.getDataFim() != null) {
+        OrdemServico ordem = ordemServicoService.findById(id).orElse(null);
+        if (ordem != null && ordem.getDataInicio() != null && ordem.getDataFim() != null) {
             Duration duration = Duration.between(ordem.getDataInicio(), ordem.getDataFim());
             long horas = duration.toHours();
             long minutos = duration.toMinutes() % 60;
@@ -81,21 +85,21 @@ public class OrdemServicoController {
         dto.setStatus(ordem.getStatus() != null ? ordem.getStatus().name() : null);
         return dto;
     }
-    private ClienteDto toClienteDto(com.oficina.api.domain.Cliente cliente) {
+    private ClienteDto toClienteDto(Cliente cliente) {
         ClienteDto dto = new ClienteDto();
         dto.setId(cliente.getId());
         dto.setNome(cliente.getNome());
         dto.setCpfOuCnpj(cliente.getCpfOuCnpj());
         return dto;
     }
-    private ServicoDto toServicoDto(com.oficina.api.domain.Servico servico) {
+    private ServicoDto toServicoDto(Servico servico) {
         ServicoDto dto = new ServicoDto();
         dto.setId(servico.getId());
         dto.setNome(servico.getNome());
         dto.setPreco(servico.getPreco());
         return dto;
     }
-    private ProdutoDto toProdutoDto(com.oficina.api.domain.Produto produto) {
+    private ProdutoDto toProdutoDto(Produto produto) {
         ProdutoDto dto = new ProdutoDto();
         dto.setId(produto.getId());
         dto.setNome(produto.getNome());
