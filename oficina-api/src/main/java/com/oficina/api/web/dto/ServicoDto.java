@@ -4,11 +4,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
+import java.math.BigDecimal;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class ServicoDto {
     private Long id;
     private String nome;
-    private double preco;
+    private BigDecimal preco;
 }
