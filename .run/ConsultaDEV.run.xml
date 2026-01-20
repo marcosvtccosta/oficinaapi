@@ -1,0 +1,22 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="ConsultaDEV" type="Application" factoryName="Application">
+    <option name="ALTERNATIVE_JRE_PATH" value="17" />
+    <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
+    <envs>
+      <env name="USERNAME_DATABASE" value="root" />
+      <env name="PASSWORD_DATABASE" value="12345678" />
+      <env name="USER_ROLE" value="USER" />
+      <env name="ADMIN_ROLE" value="ADMIN" />
+      <env name="USER_USERNAME" value="user" />
+      <env name="ADMIN_USERNAME" value="admin" />
+      <env name="USER_PASSWORD" value="password" />
+      <env name="ADMIN_PASSWORD" value="admin" />
+    </envs>
+    <option name="MAIN_CLASS_NAME" value="com.oficina.api.OficinaApiApplication" />
+    <module name="oficina-api" />
+    <option name="VM_PARAMETERS" value="-Dspring.profiles.active=DEV" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
