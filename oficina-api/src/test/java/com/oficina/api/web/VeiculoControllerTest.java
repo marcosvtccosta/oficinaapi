@@ -8,13 +8,12 @@ import org.mockito.Mockito;
 import static org.junit.jupiter.api.Assertions.*;
 
 class VeiculoControllerTest {
+    private  final VeiculoRepository repo = Mockito.mock(VeiculoRepository.class);
     @Test
     void testGetVeiculo() {
-        VeiculoRepository repo = Mockito.mock(VeiculoRepository.class);
         Veiculo veiculo = Veiculo.builder().placa("ABC1234").marca("Ford").modelo("Fiesta").ano(2020).build();
         Mockito.when(repo.findByPlaca("ABC1234")).thenReturn(veiculo);
-        VeiculoController controller = new VeiculoController();
-        controller.veiculoRepository = repo;
+        VeiculoController controller = new VeiculoController(repo);
         assertEquals("Ford", controller.getVeiculo("ABC1234").getMarca());
     }
 }

@@ -2,30 +2,41 @@ package com.oficina.api.web.controller;
 
 import com.oficina.api.domain.Veiculo;
 import com.oficina.api.domain.VeiculoRepository;
+import com.oficina.api.web.dto.VeiculoDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import java.util.regex.Pattern;
+import com.oficina.api.domain.PlacaRegexProvider;
 
 @RestController
 @RequestMapping("/veiculos")
 public class VeiculoController {
+
+    private final VeiculoRepository veiculoRepository;
     @Autowired
-    public VeiculoRepository veiculoRepository;
+     public VeiculoController(VeiculoRepository veiculoRepository) {
+        this.veiculoRepository = veiculoRepository;
+    }
 
     @GetMapping("/{placa}")
-    public Veiculo getVeiculo(@PathVariable String placa) {
-        return veiculoRepository.findByPlaca(placa);
+    public VeiculoDto getVeiculo(@PathVariable String placa) {
+        Veiculo veiculo = veiculoRepository.findByPlaca(placa);
+        return toDto(veiculo);
     }
 
     @PostMapping
-    public Veiculo createVeiculo(@RequestBody Veiculo veiculo) {
-        return veiculoRepository.save(veiculo);
+    public VeiculoDto createVeiculo(@RequestBody VeiculoDto veiculoDto) {
+        Veiculo veiculo = toEntity(veiculoDto);
+        Veiculo saved = veiculoRepository.save(veiculo);
+        return toDto(saved);
     }
 
     @PutMapping("/{placa}")
-    public Veiculo updateVeiculo(@PathVariable String placa, @RequestBody Veiculo veiculo) {
+    public VeiculoDto updateVeiculo(@PathVariable String placa, @RequestBody VeiculoDto veiculoDto) {
+        Veiculo veiculo = toEntity(veiculoDto);
         veiculo.setPlaca(placa);
-        return veiculoRepository.save(veiculo);
+        Veiculo updated = veiculoRepository.save(veiculo);
+        return toDto(updated);
     }
 
     @DeleteMapping("/{placa}")
@@ -39,10 +50,27 @@ public class VeiculoController {
     }
 
     private boolean isValidPlaca(String placa) {
-        // Regex para placas Mercosul e antigas
-        String regexMercosul = "^[A-Z]{3}[0-9][A-Z][0-9]{2}$";
-        String regexAntiga = "^[A-Z]{3}[0-9]{4}$";
+        String regexMercosul = PlacaRegexProvider.REGEX_MERCOSUL;
+        String regexAntiga = PlacaRegexProvider.REGEX_ANTIGA;
         return Pattern.matches(regexMercosul, placa) || Pattern.matches(regexAntiga, placa);
     }
-}
 
+    private VeiculoDto toDto(Veiculo veiculo) {
+        if (veiculo == null) return null;
+        VeiculoDto dto = new VeiculoDto();
+        dto.setPlaca(veiculo.getPlaca());
+        dto.setMarca(veiculo.getMarca());
+        dto.setModelo(veiculo.getModelo());
+        dto.setAno(veiculo.getAno());
+        return dto;
+    }
+    private Veiculo toEntity(VeiculoDto dto) {
+        if (dto == null) return null;
+        Veiculo veiculo = new Veiculo();
+        veiculo.setPlaca(dto.getPlaca());
+        veiculo.setMarca(dto.getMarca());
+        veiculo.setModelo(dto.getModelo());
+        veiculo.setAno(dto.getAno());
+        return veiculo;
+    }
+}

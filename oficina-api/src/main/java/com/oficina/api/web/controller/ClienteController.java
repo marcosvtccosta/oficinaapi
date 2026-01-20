@@ -2,6 +2,7 @@ package com.oficina.api.web.controller;
 
 import com.oficina.api.domain.Cliente;
 import com.oficina.api.domain.ClienteRepository;
+import com.oficina.api.web.dto.ClienteDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import java.util.regex.Pattern;
@@ -9,23 +10,32 @@ import java.util.regex.Pattern;
 @RestController
 @RequestMapping("/clientes")
 public class ClienteController {
+    private final ClienteRepository clienteRepository;
+
     @Autowired
-    public ClienteRepository clienteRepository;
+    public ClienteController(ClienteRepository clienteRepository) {
+        this.clienteRepository = clienteRepository;
+    }
 
     @GetMapping("/{id}")
-    public Cliente getCliente(@PathVariable Long id) {
-        return clienteRepository.findById(id);
+    public ClienteDto getCliente(@PathVariable Long id) {
+        Cliente cliente = clienteRepository.findById(id);
+        return toDto(cliente);
     }
 
     @PostMapping
-    public Cliente createCliente(@RequestBody Cliente cliente) {
-        return clienteRepository.save(cliente);
+    public ClienteDto createCliente(@RequestBody ClienteDto clienteDto) {
+        Cliente cliente = toEntity(clienteDto);
+        Cliente saved = clienteRepository.save(cliente);
+        return toDto(saved);
     }
 
     @PutMapping("/{id}")
-    public Cliente updateCliente(@PathVariable Long id, @RequestBody Cliente cliente) {
+    public ClienteDto updateCliente(@PathVariable Long id, @RequestBody ClienteDto clienteDto) {
+        Cliente cliente = toEntity(clienteDto);
         cliente.setId(id);
-        return clienteRepository.save(cliente);
+        Cliente updated = clienteRepository.save(cliente);
+        return toDto(updated);
     }
 
     @DeleteMapping("/{id}")
@@ -47,5 +57,22 @@ public class ClienteController {
         // Regex simples para CNPJ: 14 dígitos
         return Pattern.matches("\\d{14}", cnpj);
     }
-}
 
+    private ClienteDto toDto(Cliente cliente) {
+        if (cliente == null) return null;
+        ClienteDto dto = new ClienteDto();
+        dto.setId(cliente.getId());
+        dto.setNome(cliente.getNome());
+        dto.setCpfOuCnpj(cliente.getCpfOuCnpj());
+        return dto;
+    }
+
+    private Cliente toEntity(ClienteDto dto) {
+        if (dto == null) return null;
+        Cliente cliente = new Cliente();
+        cliente.setId(dto.getId());
+        cliente.setNome(dto.getNome());
+        cliente.setCpfOuCnpj(dto.getCpfOuCnpj());
+        return cliente;
+    }
+}

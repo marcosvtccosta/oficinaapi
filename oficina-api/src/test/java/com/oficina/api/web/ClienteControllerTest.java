@@ -8,31 +8,31 @@ import org.mockito.Mockito;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ClienteControllerTest {
+    private final ClienteRepository repo = Mockito.mock(ClienteRepository.class);
+
     @Test
     void testValidarDocumentoCpfValido() {
-        ClienteController controller = new ClienteController();
+        ClienteController controller = new ClienteController(repo);
         assertTrue(controller.validarDocumento("12345678901"));
     }
 
     @Test
     void testValidarDocumentoCnpjValido() {
-        ClienteController controller = new ClienteController();
+        ClienteController controller = new ClienteController(repo);
         assertTrue(controller.validarDocumento("12345678000199"));
     }
 
     @Test
     void testValidarDocumentoInvalido() {
-        ClienteController controller = new ClienteController();
+        ClienteController controller = new ClienteController(repo);
         assertFalse(controller.validarDocumento("123"));
     }
 
     @Test
     void testGetCliente() {
-        ClienteRepository repo = Mockito.mock(ClienteRepository.class);
         Cliente cliente = Cliente.builder().id(1L).nome("Teste").cpfOuCnpj("12345678901").build();
         Mockito.when(repo.findById(1L)).thenReturn(cliente);
-        ClienteController controller = new ClienteController();
-        controller.clienteRepository = repo;
+        ClienteController controller = new ClienteController(repo);
         assertEquals("Teste", controller.getCliente(1L).getNome());
     }
 }
