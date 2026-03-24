@@ -22,7 +22,7 @@ COPY --from=build /app/target/oficina-api-0.0.1-SNAPSHOT.jar app.jar
 EXPOSE 8080
 
 # Default profile (basic)
-ENV SPRING_PROFILES_ACTIVE=""
+ENV SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
 
 # Run
 ENTRYPOINT ["java","-jar","/app/app.jar"]

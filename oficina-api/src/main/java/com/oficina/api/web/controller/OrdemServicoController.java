@@ -6,28 +6,36 @@ import com.oficina.api.domain.entity.Cliente;
 import com.oficina.api.domain.entity.Produto;
 import com.oficina.api.domain.entity.Servico;
 import com.oficina.api.web.dto.OrdemServicoDto;
+import com.oficina.api.web.dto.OrdemServicoStatusResponseDto;
 import com.oficina.api.web.dto.ClienteDto;
 import com.oficina.api.web.dto.ServicoDto;
 import com.oficina.api.web.dto.ProdutoDto;
 import com.oficina.api.application.OrdemServicoService;
-import org.springframework.beans.factory.annotation.Autowired;
+
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import java.time.Duration;
+import java.util.List;
 
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/ordens-servico")
 public class OrdemServicoController {
     private final OrdemServicoService ordemServicoService;
 
-    @Autowired
-    public OrdemServicoController(OrdemServicoService ordemServicoService) {
-        this.ordemServicoService = ordemServicoService;
-    }
 
     @GetMapping("/{id}")
     public OrdemServicoDto getOrdemServico(@PathVariable Long id) {
         OrdemServico ordemServico = ordemServicoService.findById(id).orElse(null);
         return toDto(ordemServico);
+    }
+
+    @GetMapping("/abertas/ordenadas")
+    public List<OrdemServicoDto> listarOrdensAbertasOrdenadas() {
+        return ordemServicoService.listarOrdensAbertasOrdenadas()
+                .stream()
+                .map(this::toDto)
+                .toList();
     }
 
     @PostMapping
@@ -50,16 +58,23 @@ public class OrdemServicoController {
         ordemServicoService.deleteById(id);
     }
 
-    @PatchMapping("/{id}/status")
-    public OrdemServicoDto alterarStatus(@PathVariable Long id, @RequestParam OrdemServicoStatus status) {
-        OrdemServico ordem = ordemServicoService.findById(id).orElse(null);
-        if (ordem != null) {
-            ordem.setStatus(status);
-            OrdemServico updated = ordemServicoService.save(ordem);
-            return toDto(updated);
-        }
-        return null;
+
+    @PostMapping("/{id}/status")
+    public OrdemServicoStatusResponseDto alterarStatusViaPost(@PathVariable Long id,
+                                                              @RequestParam OrdemServicoStatus status) {
+        OrdemServico ordemAtualizada = ordemServicoService.atualizarStatusComRetorno(id, status).orElse(null);
+        return toStatusResponseDto(ordemAtualizada);
     }
+
+    @GetMapping("/{id}/status")
+    public String getStatusOrdemServico(@PathVariable Long id) {
+        OrdemServico ordem = ordemServicoService.findById(id).orElse(null);
+        if (ordem == null || ordem.getStatus() == null) {
+            return null;
+        }
+        return ordem.getStatus().name();
+    }
+
 
     @GetMapping("/{id}/tempo-gasto")
     public String tempoGasto(@PathVariable Long id) {
@@ -107,6 +122,16 @@ public class OrdemServicoController {
         dto.setQuantidadeEstoque(produto.getQuantidadeEstoque());
         return dto;
     }
+
+    private OrdemServicoStatusResponseDto toStatusResponseDto(OrdemServico ordem) {
+        if (ordem == null) return null;
+        OrdemServicoStatusResponseDto dto = new OrdemServicoStatusResponseDto();
+        dto.setIdOrdemServico(ordem.getId());
+        dto.setNomeCliente(ordem.getCliente() != null ? ordem.getCliente().getNome() : null);
+        dto.setStatus(ordem.getStatus() != null ? ordem.getStatus().name() : null);
+        return dto;
+    }
+
     private OrdemServico toEntity(OrdemServicoDto dto) {
         if (dto == null) return null;
         OrdemServico ordem = new OrdemServico();

@@ -3,19 +3,15 @@ package com.oficina.api.web.controller;
 import com.oficina.api.application.ProdutoService;
 import com.oficina.api.domain.entity.Produto;
 import com.oficina.api.web.dto.ProdutoDto;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/produtos")
 public class ProdutoController {
 
     private final ProdutoService produtoService;
-
-    @Autowired
-    public ProdutoController(ProdutoService produtoService) {
-        this.produtoService = produtoService;
-    }
 
     @GetMapping("/{id}")
     public ProdutoDto getProduto(@PathVariable Long id) {

@@ -1,0 +1,116 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: spcjud-consulta
+  labels:
+    name: spcjud-consulta
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cm-spcjud-consulta
+  namespace: spcjud-consulta
+data:
+  TZ: "America/Sao_Paulo"
+  JAVA_OPTS: "-Xms300m -Xmx500m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-spcjud-consulta
+  namespace: spcjud-consulta
+spec:
+  selector:
+    app: po-spcjud-consulta
+  type: ClusterIP
+  ports:
+    - name: spcjud-consulta
+      protocol: TCP
+      port: 8080
+      targetPort: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ing-spcjud-consulta
+  namespace: spcjud-consulta
+spec:
+  ingressClassName: ingress-interno
+  tls:
+    - hosts:
+        - localhost
+  rules:
+    - host: localhost
+      http:
+        paths:
+          - backend:
+              service:
+                name: svc-spcjud-consulta
+                port:
+                  number: 8080
+            path: /
+            pathType: Prefix
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deploy-spcjud-consulta
+  namespace: spcjud-consulta
+  labels:
+    app: deploy-spcjud-consulta
+spec:
+  selector:
+    matchLabels:
+      app: po-spcjud-consulta
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: po-spcjud-consulta
+    spec:
+      containers:
+        - name: deploy-spcjud-consulta
+          image: registry.spcdc.org.br/desenvolvimento/spcjud/spcjud-consulta:0
+          imagePullPolicy: Always
+          resources:
+            requests:
+              cpu: 10m
+              memory: 10Mi
+            limits:
+              cpu: 1000m
+              memory: 1536Mi
+          envFrom:
+            - secretRef:
+                name: secret-spcjud-consulta
+            - configMapRef:
+                name: cm-spcjud-consulta
+          ports:
+            - containerPort: 8080
+      imagePullSecrets:
+        - name: registry-gitlab
+      restartPolicy: Always
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: hpa-spcjud-consulta
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: deploy-spcjud-consulta
+  minReplicas: 1
+  maxReplicas: 5
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 70

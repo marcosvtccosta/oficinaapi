@@ -1,0 +1,28 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+configMapGenerator:
+  - name: cm-spcjud-consulta
+    namespace: spcjud-consulta
+    behavior: merge
+    literals:
+      - SPRING_PROFILES_ACTIVE=HML
+
+patches:
+  - patch: |-
+      - op: replace
+        path: /spec/rules/0/host
+        value: stg-spcjud.spcdc.org.br
+    target:
+      kind: Ingress
+      name: ing-spcjud-consulta
+  - patch: |-
+      - op: replace
+        path: /spec/tls/0/hosts/0
+        value: stg-spcjud.spcdc.org.br
+    target:
+      kind: Ingress
+      name: ing-spcjud-consulta
+
+resources:
+  - ../../base

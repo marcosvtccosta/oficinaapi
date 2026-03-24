@@ -3,19 +3,23 @@ package com.oficina.api.web.controller;
 import com.oficina.api.application.ServicoService;
 import com.oficina.api.domain.entity.Servico;
 import com.oficina.api.web.dto.ServicoDto;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/servicos")
 public class ServicoController {
 
     private final ServicoService servicoService;
 
-    @Autowired
-    public ServicoController(ServicoService servicoService) {
-        this.servicoService = servicoService;
-    }
 
     @GetMapping("/{id}")
     public ServicoDto getServico(@PathVariable Long id) {

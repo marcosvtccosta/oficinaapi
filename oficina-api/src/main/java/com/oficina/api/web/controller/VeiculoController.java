@@ -1,23 +1,28 @@
 package com.oficina.api.web.controller;
 
-import com.oficina.api.domain.entity.Veiculo;
 import com.oficina.api.application.VeiculoService;
-import com.oficina.api.web.dto.VeiculoDto;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-import java.util.regex.Pattern;
 import com.oficina.api.domain.entity.PlacaRegexProvider;
+import com.oficina.api.domain.entity.Veiculo;
+import com.oficina.api.web.dto.VeiculoDto;
+import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
+import java.util.regex.Pattern;
+
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/veiculos")
 public class VeiculoController {
 
     private final VeiculoService veiculoService;
-
-    @Autowired
-    public VeiculoController(VeiculoService veiculoService) {
-        this.veiculoService = veiculoService;
-    }
 
     @GetMapping("/{placa}")
     public VeiculoDto getVeiculo(@PathVariable String placa) {
