@@ -110,7 +110,37 @@ public class OrdemServicoController {
     private OrdemServico toEntity(OrdemServicoDto dto) {
         if (dto == null) return null;
         OrdemServico ordem = new OrdemServico();
-        ordem.setId(dto.getId());
+
+        Cliente cliente = null;
+        if (dto.getCliente() != null) {
+            cliente = new Cliente();
+            cliente.setId(dto.getCliente().getId());
+            cliente.setNome(dto.getCliente().getNome());
+            cliente.setCpfOuCnpj(dto.getCliente().getCpfOuCnpj());
+        }
+        ordem.setCliente(cliente);
+
+        ordem.setServicos(dto.getServicos() != null
+                ? dto.getServicos().stream().map(servicoDto -> {
+                    Servico servico = new Servico();
+                    servico.setId(servicoDto.getId());
+                    servico.setNome(servicoDto.getNome());
+                    servico.setPreco(servicoDto.getPreco());
+                    return servico;
+                }).toList()
+                : null);
+
+        ordem.setProdutos(dto.getProdutos() != null
+                ? dto.getProdutos().stream().map(produtoDto -> {
+                    Produto produto = new Produto();
+                    produto.setId(produtoDto.getId());
+                    produto.setNome(produtoDto.getNome());
+                    produto.setPreco(produtoDto.getPreco());
+                    produto.setQuantidadeEstoque(produtoDto.getQuantidadeEstoque());
+                    return produto;
+                }).toList()
+                : null);
+
         ordem.setDataInicio(dto.getDataInicio());
         ordem.setDataFim(dto.getDataFim());
         if (dto.getStatus() != null) ordem.setStatus(OrdemServicoStatus.valueOf(dto.getStatus()));
